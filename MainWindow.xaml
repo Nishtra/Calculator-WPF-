@@ -21,8 +21,9 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         
-        <TextBox Grid.Row="0" FontSize="14" Margin="2" IsReadOnly="True" TextAlignment="Right"/>
-        <TextBox Grid.Row="1" FontSize="24" FontWeight="Bold" Margin="2" IsReadOnly="True" TextAlignment="Right"/>
+        <TextBox x:Name="tbExpression" Grid.Row="0" FontSize="14" Margin="2" IsReadOnly="True" TextAlignment="Right"/>
+        <TextBox x:Name="tbCurrentNumber" Grid.Row="1" FontSize="22" FontWeight="SemiBold" Margin="2" Padding="2" 
+                 IsReadOnly="True" TextAlignment="Right" Text="0"/>
         
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
@@ -39,25 +40,25 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Button Content="0" Grid.Row="4" Grid.Column="1"/>
-            <Button Content="1" Grid.Row="3" Grid.Column="0"/>
-            <Button Content="2" Grid.Row="3" Grid.Column="1"/>
-            <Button Content="3" Grid.Row="3" Grid.Column="2"/>
-            <Button Content="4" Grid.Row="2" Grid.Column="0"/>
-            <Button Content="5" Grid.Row="2" Grid.Column="1"/>
-            <Button Content="6" Grid.Row="2" Grid.Column="2"/>
-            <Button Content="7" Grid.Row="1" Grid.Column="0"/>
-            <Button Content="8" Grid.Row="1" Grid.Column="1"/>
-            <Button Content="9" Grid.Row="1" Grid.Column="2"/>
-            <Button Content="/" Grid.Row="0" Grid.Column="3"/>
-            <Button Content="*" Grid.Row="1" Grid.Column="3"/>
-            <Button Content="-" Grid.Row="2" Grid.Column="3"/>
-            <Button Content="+" Grid.Row="3" Grid.Column="3"/>
-            <Button Content="=" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2"/>
-            <Button Content="." Grid.Row="4" Grid.Column="0"/>
-            <Button Content="CE" Grid.Row="0" Grid.Column="0"/>
-            <Button Content="C" Grid.Row="0" Grid.Column="1"/>
-            <Button Content="&lt;" Grid.Row="0" Grid.Column="2"/>
+            <Button Content="0" Grid.Row="4" Grid.Column="1" Click="OnNumBtn_Click"/>
+            <Button Content="1" Grid.Row="3" Grid.Column="0" Click="OnNumBtn_Click"/>
+            <Button Content="2" Grid.Row="3" Grid.Column="1" Click="OnNumBtn_Click"/>
+            <Button Content="3" Grid.Row="3" Grid.Column="2" Click="OnNumBtn_Click"/>
+            <Button Content="4" Grid.Row="2" Grid.Column="0" Click="OnNumBtn_Click"/>
+            <Button Content="5" Grid.Row="2" Grid.Column="1" Click="OnNumBtn_Click"/>
+            <Button Content="6" Grid.Row="2" Grid.Column="2" Click="OnNumBtn_Click"/>
+            <Button Content="7" Grid.Row="1" Grid.Column="0" Click="OnNumBtn_Click"/>
+            <Button Content="8" Grid.Row="1" Grid.Column="1" Click="OnNumBtn_Click"/>
+            <Button Content="9" Grid.Row="1" Grid.Column="2" Click="OnNumBtn_Click"/>
+            <Button Content="/" Grid.Row="0" Grid.Column="3" Click="OnMathOperationBtn_Click"/>
+            <Button Content="*" Grid.Row="1" Grid.Column="3" Click="OnMathOperationBtn_Click"/>
+            <Button Content="-" Grid.Row="2" Grid.Column="3" Click="OnMathOperationBtn_Click"/>
+            <Button Content="+" Grid.Row="3" Grid.Column="3" Click="OnMathOperationBtn_Click"/>
+            <Button Content="=" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Click="OnEqualsBtn_Click"/>
+            <Button Content="." Grid.Row="4" Grid.Column="0" Click="OnNumBtn_Click"/>
+            <Button Content="CE" Grid.Row="0" Grid.Column="0" Click="OnFunctionalBtn_Click"/>
+            <Button Content="C" Grid.Row="0" Grid.Column="1" Click="OnFunctionalBtn_Click"/>
+            <Button Content="&lt;" Grid.Row="0" Grid.Column="2" Click="OnFunctionalBtn_Click"/>
         </Grid>
     </Grid>
 </Window>
