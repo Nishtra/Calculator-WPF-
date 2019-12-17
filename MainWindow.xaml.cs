@@ -73,26 +73,7 @@ namespace Calc
             // replace the last operation sign in expression if the user hasn't yet entered a new number
             if (isShowingResult && tbExpression.Text.Length > 0)
             {
-                char lastOperationChar = tbExpression.Text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Last()[0];
-
-                if (nextOperation[0] != lastOperationChar)
-                {
-                    tbExpression.Text = $"{tbExpression.Text.Substring(0, tbExpression.Text.Length - 2)}{nextOperation} ";
-
-                    bool addBrackets = (lastOperationChar == '+' || lastOperationChar == '-')
-                        && (nextOperation[0] == '*' || nextOperation[0] == '/');
-                    bool removeBrackets = (lastOperationChar == '*' || lastOperationChar == '/')
-                        && (nextOperation[0] == '+' || nextOperation[0] == '-');
-
-                    if (addBrackets)
-                    {
-                        tbExpression.Text = tbExpression.Text.Insert(0, "(").Insert(tbExpression.Text.Length - 2, ")");
-                    }
-                    else if (removeBrackets)
-                    {
-                        tbExpression.Text = tbExpression.Text.Replace("(", "").Replace(")", "");
-                    }
-                }
+                ChangeLastOperationSign(nextOperation);
             }
             // calculate result
             else
@@ -122,6 +103,30 @@ namespace Calc
             }
             
             operation = nextOperation;
+        }
+
+        private void ChangeLastOperationSign(string nextOperation)
+        {
+            char lastOperationChar = tbExpression.Text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Last()[0];
+
+            if (nextOperation[0] != lastOperationChar)
+            {
+                tbExpression.Text = $"{tbExpression.Text.Substring(0, tbExpression.Text.Length - 2)}{nextOperation} ";
+
+                bool addBrackets = (lastOperationChar == '+' || lastOperationChar == '-')
+                    && (nextOperation[0] == '*' || nextOperation[0] == '/');
+                bool removeBrackets = (lastOperationChar == '*' || lastOperationChar == '/')
+                    && (nextOperation[0] == '+' || nextOperation[0] == '-');
+
+                if (addBrackets)
+                {
+                    tbExpression.Text = tbExpression.Text.Insert(0, "(").Insert(tbExpression.Text.Length - 2, ")");
+                }
+                else if (removeBrackets)
+                {
+                    tbExpression.Text = tbExpression.Text.Replace("(", "").Replace(")", "");
+                }
+            }
         }
 
         private void CalcResult()
