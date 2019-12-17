@@ -66,6 +66,10 @@ namespace Calc
         {
             string nextOperation = ((Button)sender).Content.ToString();
 
+            // reset operation after resetting expression (after the user presses Equals button)
+            if (tbExpression.Text.Length == 0)
+                operation = null;
+
             // replace the last operation sign in expression if the user hasn't yet entered a new number
             if (isShowingResult && tbExpression.Text.Length > 0)
             {
@@ -144,9 +148,9 @@ namespace Calc
                         return;
                 }
             }
-            catch (ArithmeticException)
+            catch (OverflowException)
             {
-                throw new ArithmeticException("Arithmetic overflow");
+                throw new OverflowException("Arithmetic overflow");
             }
         }
 
@@ -180,14 +184,14 @@ namespace Calc
 
         private void OnEqualsBtn_Click(object sender, RoutedEventArgs e)
         {
-            tbExpression.Clear();
-            
             // new input was done
             if (!isShowingResult)
                 // get new rhs operand from input, then calculate the result
                 decimal.TryParse(tbCurrentNumber.Text, out rhsOperand);
 
             CalcAndShowResult();
+
+            tbExpression.Clear();
         }
 
         private void OnFunctionalBtn_Click(object sender, RoutedEventArgs e)
