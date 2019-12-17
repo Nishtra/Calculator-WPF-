@@ -49,8 +49,8 @@ namespace Calc
             bool hasDecimalDot = tbCurrentNumber.Text.Length > 0 && tbCurrentNumber.Text.Contains(decimalSeparator);
             if (numStr == "0" && numStartsWith0 && !hasDecimalDot)
                 return;
+            
             // allow only one decimal separator
-
             if (numStr == ".")
             {
                 if (hasDecimalDot)
@@ -66,41 +66,62 @@ namespace Calc
         {
             string nextOperation = ((Button)sender).Content.ToString();
 
-            // there was a number input
-            if ((!isShowingResult || tbExpression.Text.Length == 0) && tbCurrentNumber.Text.Length > 0)
-            {
-                if (tbExpression.Text.Length == 0)
-                {
-                    operation = null;
-                    rhsOperand = 0;
-                    result = decimal.Parse(tbCurrentNumber.Text);
-                }
-                else
-                    rhsOperand = decimal.Parse(tbCurrentNumber.Text);
-                
-                tbExpression.AppendText($"{tbCurrentNumber.Text} {nextOperation} ");
-                tbCurrentNumber.Clear();
-
-                CalcAndShowResult();
-                operation = nextOperation;
-            }
-            // replace the last operation sign in expression
-            else if (tbExpression.Text.Length > 0)
+            // replace the last operation sign in expression if the user hasn't yet entered a new number
+            if (isShowingResult && tbExpression.Text.Length > 0)
             {
                 char lastOperationChar = tbExpression.Text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Last()[0];
-                
+
                 if (nextOperation[0] != lastOperationChar)
                 {
                     tbExpression.Text = $"{tbExpression.Text.Substring(0, tbExpression.Text.Length - 2)}{nextOperation} ";
-                    operation = nextOperation;
+
+                    bool addBrackets = (lastOperationChar == '+' || lastOperationChar == '-')
+                        && (nextOperation[0] == '*' || nextOperation[0] == '/');
+                    bool removeBrackets = (lastOperationChar == '*' || lastOperationChar == '/')
+                        && (nextOperation[0] == '+' || nextOperation[0] == '-');
+
+                    if (addBrackets)
+                    {
+                        tbExpression.Text = tbExpression.Text.Insert(0, "(").Insert(tbExpression.Text.Length - 2, ")");
+                    }
+                    else if (removeBrackets)
+                    {
+                        tbExpression.Text = tbExpression.Text.Replace("(", "").Replace(")", "");
+                    }
                 }
             }
+            // calculate result
+            else
+            {
+                // parse input number
+                // no operation to perform -> no lhs operand (result) -> parse input to lhs operand
+                if (operation == null)
+                    decimal.TryParse(tbCurrentNumber.Text, out result);
+                else
+                    decimal.TryParse(tbCurrentNumber.Text, out rhsOperand);
+
+                CalcAndShowResult();
+
+                // build expression
+                if (operation == null)
+                    tbExpression.Text = $"{result} {nextOperation} ";
+                else
+                {
+                    if (nextOperation == "+" || nextOperation == "-")
+                        tbExpression.AppendText($"{rhsOperand.ToString()} {nextOperation} ");
+                    else if (nextOperation == "*" || nextOperation == "/")
+                    {
+                        tbExpression.Text = tbExpression.Text.Insert(0, "(");
+                        tbExpression.AppendText($"{rhsOperand.ToString()}) {nextOperation} ");
+                    }
+                }
+            }
+            
+            operation = nextOperation;
         }
 
-        private void CalcAndShowResult()
+        private void CalcResult()
         {
-            bool divBy0 = false;
-            bool arithmeticOverflow = false;
             try
             {
                 switch (operation)
@@ -115,35 +136,46 @@ namespace Calc
                         result *= rhsOperand;
                         break;
                     case "/":
-                        if (rhsOperand != 0)
-                            result /= rhsOperand;
-                        else
-                            divBy0 = true;
+                        if (rhsOperand == 0)
+                            throw new DivideByZeroException("DIV BY 0");
+                        result /= rhsOperand;
                         break;
                     default:
                         return;
                 }
             }
-            catch (ArithmeticException e)
+            catch (ArithmeticException)
             {
-                arithmeticOverflow = true;
+                throw new ArithmeticException("Arithmetic overflow");
             }
+        }
 
-            if (divBy0)
-            {
-                tbExpression.Clear();
-                tbCurrentNumber.Text = "DIV BY 0";
-                result = 0;
-            }
-            else if (arithmeticOverflow)
-            {
-                tbExpression.Clear();
-                tbCurrentNumber.Text = "Arithmetic overflow";
-                result = 0;
-            }
-            else
+        private void ShowResult(string errorMsg = null)
+        {
+            if (errorMsg == null)
                 tbCurrentNumber.Text = result.ToString("G29");
+            else
+            {
+                tbCurrentNumber.Text = errorMsg;
+            }
             isShowingResult = true;
+        }
+
+        private void CalcAndShowResult()
+        {
+            string errorMsg = null;
+            try
+            {
+                CalcResult();
+            }
+            catch (Exception xcp)
+            {
+                errorMsg = xcp.Message;
+                tbExpression.Clear();
+                result = 0;
+                rhsOperand = 0;
+            }
+            ShowResult(errorMsg);
         }
 
         private void OnEqualsBtn_Click(object sender, RoutedEventArgs e)
@@ -153,8 +185,8 @@ namespace Calc
             // new input was done
             if (!isShowingResult)
                 // get new rhs operand from input, then calculate the result
-                rhsOperand = decimal.Parse(tbCurrentNumber.Text);
-            
+                decimal.TryParse(tbCurrentNumber.Text, out rhsOperand);
+
             CalcAndShowResult();
         }
 
@@ -165,23 +197,27 @@ namespace Calc
             {
                 case "C":
                     tbExpression.Clear();
-                    tbCurrentNumber.Clear();
                     operation = null;
                     rhsOperand = 0;
                     result = 0;
-                    tbCurrentNumber.Text = "0";
-                    isShowingResult = true;
+                    ResetNumberInputField();
                     break;
                 case "CE":
-                    tbCurrentNumber.Clear();
-                    tbCurrentNumber.Text = "0";
-                    isShowingResult = true;
+                    ResetNumberInputField();
                     break;
                 case "<":
-                    if (tbCurrentNumber.Text.Length > 0)
+                    if (tbCurrentNumber.Text.Length == 1)
+                        ResetNumberInputField();
+                    else if (tbCurrentNumber.Text.Length > 0)
                         tbCurrentNumber.Text = tbCurrentNumber.Text.Substring(0, tbCurrentNumber.Text.Length - 1);
                     break;
             }
+        }
+
+        private void ResetNumberInputField()
+        {
+            tbCurrentNumber.Text = "0";
+            isShowingResult = true;
         }
     }
 }
